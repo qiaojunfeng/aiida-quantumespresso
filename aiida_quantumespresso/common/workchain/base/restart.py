@@ -119,6 +119,7 @@ class BaseRestartWorkChain(WorkChain):
         This is the case as long as the last calculation has not finished successfully and the maximum number of
         restarts has not yet been exceeded.
         """
+        self.report("jqiao: should_run_calculation self.ctx.iteration {}".format(self.ctx.iteration))
         return not self.ctx.is_finished and self.ctx.iteration < self.inputs.max_iterations.value
 
     def run_calculation(self):
@@ -151,6 +152,7 @@ class BaseRestartWorkChain(WorkChain):
     def inspect_calculation(self):
         """Analyse the results of the previous calculation and call the error handlers when necessary."""
         calculation = self.ctx.calculations[self.ctx.iteration - 1]
+        self.report('jqiao: is_finished_ok {}, is_excepted {}, is_killed {}'.format(calculation.is_finished_ok, calculation.is_excepted, calculation.is_killed))
 
         # Done: successful completion of last calculation
         if calculation.is_finished_ok:
@@ -186,8 +188,10 @@ class BaseRestartWorkChain(WorkChain):
         # Failed: here the calculation is `Finished` but has a non-zero exit status, initiate the error handling
         try:
             exit_code = self._handle_calculation_failure(calculation)
+            self.report("jqiao: exit_code1 {}".format(exit_code))
         except UnexpectedCalculationFailure as exception:
             exit_code = self._handle_unexpected_failure(calculation, exception)
+            self.report("jqiao: exit_code with UnexpectedCalculationFailure {}".format(exit_code))
 
         # If the exit code returned actually has status `0` that means we consider the calculation as successful
         if isinstance(exit_code, ExitCode) and exit_code.status == 0:
