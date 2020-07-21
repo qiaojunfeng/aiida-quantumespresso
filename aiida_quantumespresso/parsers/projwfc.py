@@ -127,7 +127,10 @@ def spin_dependent_subparser(out_info_dict):
     try:
         parent_kpoints = parent_calc.get_incoming(link_label_filter='kpoints').one().node
     except ValueError:
-        raise QEOutputParsingError('The parent had no input kpoints! Cannot parse from this!')
+        try:
+            parent_kpoints = parent_calc.get_outgoing(link_label_filter='kpoints').one().node
+        except ValueError:
+            raise QEOutputParsingError('The parent had no input/output kpoints! Cannot parse from this!')
     try:
         if len(od['k_vect']) != len(parent_kpoints.get_kpoints()):
             raise AttributeError
@@ -346,7 +349,10 @@ class ProjwfcParser(Parser):
         try:
             structure = parent_calc.get_incoming(link_label_filter='structure').one().node
         except ValueError:
-            raise QEOutputParsingError('The parent had no input structure! Cannot parse from this!')
+            try:
+                structure = parent_calc.get_outgoing(link_label_filter='structure').one().node
+            except ValueError:
+                raise QEOutputParsingError('The parent had no input/output structure! Cannot parse from this!')
         try:
             nspin = parent_param.get_dict()['number_of_spin_components']
             if nspin != 1:
