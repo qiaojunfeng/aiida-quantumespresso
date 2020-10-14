@@ -60,4 +60,14 @@ class Pw2wannier90Calculation(NamelistsCalculation):
             (nnkp_file.uuid, nnkp_file.filename, f'{self._SEEDNAME}.nnkp')
         )
 
+        # remove calcinfo.stin_name and add it in cmdline_params
+        # in this way the mpirun ... pw.x ... < aiida.in
+        # is replaced by mpirun ... pw.x ... -in aiida.in
+        # in the scheduler, _get_run_line
+        codeinfo = calcinfo.codes_info[0]
+        codeinfo.pop('stdin_name', None)
+        cmdline_params = codeinfo.cmdline_params
+        codeinfo.cmdline_params = (list(cmdline_params) + ['-in', self.metadata.options.input_filename])
+        calcinfo.codes_info = [codeinfo]
+
         return calcinfo

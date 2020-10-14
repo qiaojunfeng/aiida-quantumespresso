@@ -55,3 +55,19 @@ class ProjwfcCalculation(NamelistsCalculation):
             message='The pdos_tot file could not be read from the retrieved folder.')
         spec.exit_code(340, 'ERROR_PARSING_PROJECTIONS',
             message='An exception was raised parsing bands and projections.')
+
+    def prepare_for_submission(self, folder):
+        """Override parent method to modify the submission commandline arguments."""
+        calcinfo = super().prepare_for_submission(folder)
+
+        # remove calcinfo.stin_name and add it in cmdline_params
+        # in this way the mpirun ... pw.x ... < aiida.in
+        # is replaced by mpirun ... pw.x ... -in aiida.in
+        # in the scheduler, _get_run_line
+        codeinfo = calcinfo.codes_info[0]
+        codeinfo.pop('stdin_name', None)
+        cmdline_params = codeinfo.cmdline_params
+        codeinfo.cmdline_params = (list(cmdline_params) + ['-in', self.metadata.options.input_filename])
+        calcinfo.codes_info = [codeinfo]
+
+        return calcinfo
