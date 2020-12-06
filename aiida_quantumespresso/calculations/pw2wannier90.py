@@ -52,6 +52,17 @@ class Pw2wannier90Calculation(NamelistsCalculation):
         :param folder: a sandbox folder to temporarily write files on disk.
         :return: :py:`~aiida.common.datastructures.CalcInfo` instance.
         """
+        if 'settings' in self.inputs:
+            settings_dict = self.inputs.settings.get_dict()
+            if "additional_remote_symlink_list" in settings_dict:
+                additional_remote_symlink_list = settings_dict.pop("additional_remote_symlink_list")
+                # remove additional_remote_symlink_list, otherwise error in super().prepare_for_submission()
+                self.inputs.settings = Dict(dict=settings_dict)
+            else:
+                additional_remote_symlink_list = []
+        else:
+            additional_remote_symlink_list = []
+
         calcinfo = super().prepare_for_submission(folder)
 
         # Put the nnkp in the folder, with the correct filename
@@ -59,5 +70,7 @@ class Pw2wannier90Calculation(NamelistsCalculation):
         calcinfo.local_copy_list.append(
             (nnkp_file.uuid, nnkp_file.filename, '{}.nnkp'.format(self._SEEDNAME))
         )
+
+        calcinfo.remote_symlink_list.extend(additional_remote_symlink_list)
 
         return calcinfo
