@@ -128,8 +128,7 @@ def generate_inputs_3d():
 
 
 def test_pp_default_1d(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_1d, data_regression,
-    num_regression
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_1d, data_regression, num_regression
 ):
     """Test a default `pp.x` calculation producing a 1D data set."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -156,8 +155,8 @@ def test_pp_default_1d(
 
 
 def test_pp_default_1d_spherical(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_1d_spherical,
-    data_regression, num_regression
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_1d_spherical, data_regression,
+    num_regression
 ):
     """Test a default `pp.x` calculation producing a 1D data set with spherical averaging."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -195,8 +194,7 @@ def test_pp_default_1d_spherical(
 
 
 def test_pp_default_2d(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_2d, data_regression,
-    num_regression
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_2d, data_regression, num_regression
 ):
     """Test a default `pp.x` calculation producing a 2D data set."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -228,8 +226,7 @@ def test_pp_default_2d(
 
 
 def test_pp_default_polar(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_polar, data_regression,
-    num_regression
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_polar, data_regression, num_regression
 ):
     """Test a default `pp.x` calculation producing a polar coordinates data set."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -256,8 +253,7 @@ def test_pp_default_polar(
 
 
 def test_pp_default_3d(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d, data_regression,
-    num_regression
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d, data_regression, num_regression
 ):
     """Test a default `pp.x` calculation producing a 3D data set."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -288,15 +284,10 @@ def test_pp_default_3d(
     })
 
 
-def test_pp_default_3d_keep_plot_file(
-    aiida_profile, generate_calc_job_node, generate_parser, generate_inputs_3d, tmpdir
-):
+def test_pp_default_3d_keep_plot_file(generate_calc_job_node, generate_parser, generate_inputs_3d, tmpdir):
     """Test a `pp.x` calculation where `keep_plot_file=False` meaning files will be parsed from temporary directory."""
     entry_point_calc_job = 'quantumespresso.pp'
     entry_point_parser = 'quantumespresso.pp'
-
-    # Need to cast the `tmpdir` which can be a `Path` object which is not yet supported in Python 3.5
-    dirpath = str(tmpdir)
 
     attributes = {'options': {'keep_plot_file': False}, 'retrieve_temporary_list': ['aiida.fileout']}
     node = generate_calc_job_node(
@@ -304,10 +295,10 @@ def test_pp_default_3d_keep_plot_file(
         test_name='default_3d',
         inputs=generate_inputs_3d,
         attributes=attributes,
-        retrieve_temporary=(dirpath, ['aiida.fileout'])
+        retrieve_temporary=(tmpdir, ['aiida.fileout'])
     )
     parser = generate_parser(entry_point_parser)
-    results, calcfunction = parser.parse_from_node(node, store_provenance=False, retrieved_temporary_folder=dirpath)
+    results, calcfunction = parser.parse_from_node(node, store_provenance=False, retrieved_temporary_folder=tmpdir)
 
     assert calcfunction.is_finished, calcfunction.exception
     assert calcfunction.is_finished_ok, calcfunction.exit_message
@@ -316,7 +307,7 @@ def test_pp_default_3d_keep_plot_file(
     assert len(results['output_data'].get_arraynames()) == 4
 
 
-def test_pp_default_3d_multiple(aiida_profile, generate_calc_job_node, generate_parser, generate_inputs_3d):
+def test_pp_default_3d_multiple(generate_calc_job_node, generate_parser, generate_inputs_3d):
     """Test a default `pp.x` calculation producing multiple files in 3D format."""
     entry_point_calc_job = 'quantumespresso.pp'
     entry_point_parser = 'quantumespresso.pp'
@@ -337,9 +328,7 @@ def test_pp_default_3d_multiple(aiida_profile, generate_calc_job_node, generate_
         assert len(node.get_arraynames()) == 4
 
 
-def test_pp_default_3d_failed_missing(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
-):
+def test_pp_default_3d_failed_missing(fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d):
     """Test a default `pp.x` calculation where no files are retrieved, or StdOut is missing."""
     entry_point_calc_job = 'quantumespresso.pp'
     entry_point_parser = 'quantumespresso.pp'
@@ -357,7 +346,7 @@ def test_pp_default_3d_failed_missing(
 
 
 def test_pp_default_3d_failed_missing_data(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
 ):
     """Test a default `pp.x` calculation where the aiida.fileout file is missing."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -375,7 +364,7 @@ def test_pp_default_3d_failed_missing_data(
 
 
 def test_pp_default_3d_failed_interrupted(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
+    fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
 ):
     """Test a default `pp.x` calculation where the StdOut file is present but incomplete."""
     entry_point_calc_job = 'quantumespresso.pp'
@@ -392,9 +381,7 @@ def test_pp_default_3d_failed_interrupted(
     assert calcfunction.exit_status == node.process_class.exit_codes.ERROR_OUTPUT_STDOUT_INCOMPLETE.status
 
 
-def test_pp_default_3d_failed_format(
-    aiida_profile, fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d
-):
+def test_pp_default_3d_failed_format(fixture_localhost, generate_calc_job_node, generate_parser, generate_inputs_3d):
     """Test a default `pp.x` calculation where an unsupported output file format is used."""
     entry_point_calc_job = 'quantumespresso.pp'
     entry_point_parser = 'quantumespresso.pp'
