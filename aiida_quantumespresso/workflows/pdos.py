@@ -330,7 +330,6 @@ class PdosWorkChain(ProtocolMixin, WorkChain):
             sub processes that are called by this workchain.
         :return: a process builder instance with all inputs defined ready for launch.
         """
-        overrides = overrides or {}
         inputs = cls.get_protocol_inputs(protocol, overrides)
 
         args = (pw_code, structure, protocol)
@@ -339,13 +338,8 @@ class PdosWorkChain(ProtocolMixin, WorkChain):
         scf.pop('clean_workdir', None)
         nscf = PwBaseWorkChain.get_builder_from_protocol(*args, overrides=inputs.get('nscf', None), **kwargs)
         nscf['pw'].pop('structure', None)
-        try:
-            occupations = overrides['nscf']['pw']['parameters']['SYSTEM']['occupations']
-            nscf['pw']['parameters']['SYSTEM']['occupations'] = occupations
-        except KeyError:
-            nscf['pw']['parameters']['SYSTEM']['occupations'] = 'tetrahedra'
-            nscf['pw']['parameters']['SYSTEM'].pop('smearing', None)
-            nscf['pw']['parameters']['SYSTEM'].pop('degauss', None)
+        nscf['pw']['parameters']['SYSTEM'].pop('smearing', None)
+        nscf['pw']['parameters']['SYSTEM'].pop('degauss', None)
         nscf.pop('clean_workdir', None)
 
         builder = cls.get_builder()

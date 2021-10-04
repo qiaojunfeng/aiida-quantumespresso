@@ -152,7 +152,7 @@ class PwBaseWorkChain(ProtocolMixin, BaseRestartWorkChain):
             an initial guess for the magnetic moment is automatically set in case neither is provided.
         :return: a process builder instance with all inputs defined ready for launch.
         """
-        from aiida_quantumespresso.workflows.protocols.utils import get_starting_magnetization
+        from aiida_quantumespresso.workflows.protocols.utils import get_starting_magnetization, recursive_merge
 
         if isinstance(code, str):
             code = orm.load_code(code)
@@ -193,6 +193,7 @@ class PwBaseWorkChain(ProtocolMixin, BaseRestartWorkChain):
                 f'failed to obtain recommended cutoffs for pseudo family `{pseudo_family}`: {exception}'
             ) from exception
 
+        # Update the parameters based on the protocol inputs
         parameters = inputs['pw']['parameters']
         parameters['CONTROL']['etot_conv_thr'] = natoms * meta_parameters['etot_conv_thr_per_atom']
         parameters['ELECTRONS']['conv_thr'] = natoms * meta_parameters['conv_thr_per_atom']
@@ -205,10 +206,14 @@ class PwBaseWorkChain(ProtocolMixin, BaseRestartWorkChain):
             parameters['SYSTEM'].pop('smearing')
 
         if spin_type is SpinType.COLLINEAR:
+            starting_magnetization = get_starting_magnetization(structure, pseudo_family, initial_magnetic_moments)
+            parameters['SYSTEM']['starting_magnetization'] = starting_magnetization
             parameters['SYSTEM']['nspin'] = 2
-            if 'starting_magnetization' not in parameters['SYSTEM'] or initial_magnetic_moments is not None:
-                starting_magnetization = get_starting_magnetization(structure, pseudo_family, initial_magnetic_moments)
-                parameters['SYSTEM']['starting_magnetization'] = starting_magnetization
+
+        if overrides:
+            # However, if overrides are provided, they are considered absolute
+            override_parameters = overrides.get('pw', {}).get('parameters', {})
+            parameters = recursive_merge(parameters, override_parameters)
 
         # pylint: disable=no-member
         builder = cls.get_builder()

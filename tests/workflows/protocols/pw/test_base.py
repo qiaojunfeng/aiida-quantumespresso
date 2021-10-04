@@ -114,7 +114,7 @@ def test_magnetization_overrides(fixture_code, generate_structure):
     assert builder.pw.parameters['SYSTEM']['starting_magnetization'] == initial_starting_magnetization
     assert builder.pw.parameters['SYSTEM']['nspin'] == 2
 
-    # Test that specifying `initial_magnetic_moments` overrides the `overrides`
+    # Test that specifying `overrides` override the `initial_magnetic_moments`
     builder = PwBaseWorkChain.get_builder_from_protocol(
         code,
         structure,
@@ -122,7 +122,7 @@ def test_magnetization_overrides(fixture_code, generate_structure):
         spin_type=SpinType.COLLINEAR,
         initial_magnetic_moments=initial_magnetic_moments
     )
-    assert builder.pw.parameters['SYSTEM']['starting_magnetization'] == {'Si': 0.25}
+    assert builder.pw.parameters['SYSTEM']['starting_magnetization'] == {'Si': 0.5}
     assert builder.pw.parameters['SYSTEM']['nspin'] == 2
 
 
