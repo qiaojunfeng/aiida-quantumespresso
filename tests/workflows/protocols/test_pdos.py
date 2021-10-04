@@ -69,3 +69,10 @@ def test_spin_type(get_pdos_generator_inputs):
         parameters = namespace['pw']['parameters'].get_dict()
         assert parameters['SYSTEM']['nspin'] == 2
         assert parameters['SYSTEM']['starting_magnetization'] == {'Si': 0.1}
+
+
+def test_nscf_smearing_raises(get_pdos_generator_inputs):
+    """Test ``PdosWorkChain.get_builder_from_protocol`` fails when NSCF uses smearing."""
+    overrides = {'nscf': {'pw': {'parameters': {'SYSTEM': {'occupations': 'smearing'}}}}}
+    with pytest.raises(ValueError, match=r'`SYSTEM.occupations` in `nscf.pw.parameters`'):
+        PdosWorkChain.get_builder_from_protocol(**get_pdos_generator_inputs, overrides=overrides)
