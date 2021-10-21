@@ -40,6 +40,7 @@ class PpParser(Parser):
         'e/bohr^5',  # Product of the electron density and the second eigenvalue of the electron-density Hessian matrix, see: dx.doi.org/10.1021/ct100641a, with sign of second eigenvalue
         21: 'e/bohr^3',  # All electron charge density, PAW case
         22: 'Ry/bohr^3',  # Kinetic energy density
+        23: 'e/bohr^3',  # Fermi charge density
     }
 
     def parse(self, **kwargs):

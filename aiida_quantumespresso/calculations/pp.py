@@ -20,8 +20,8 @@ def validate_parameters(value, ctx=None):  # pylint: disable=unused-argument
         return 'parameter `INPUTPP.plot_num` must be explicitly set'
 
     # Check that a valid plot type is requested
-    if plot_num in range(23) and plot_num not in [14, 15, 16]:  # Must be integer in range 0-22, but not 14-16:
-        parameters['INPUTPP']['plot_num'] = int(plot_num)  # If this test passes, we can safely cast to int
+    if plot_num in range(24) and plot_num not in [14, 15, 16]:
+        parameters['INPUTPP']['plot_num'] = int(plot_num)
     else:
         return '`INTPUTPP.plot_num` must be an integer in the range 0-23 excluding [14, 15, 16]'
 
