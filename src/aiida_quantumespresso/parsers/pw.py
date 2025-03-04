@@ -297,6 +297,11 @@ class PwParser(BaseParser):
 
         if relax_type == 'vc-relax':
             values = [threshold_forces, threshold_stress, external_pressure, fixed_coords]
+            skip_final_scf = parameters.get('CELL', {}).get('skip_final_scf', pw.skip_final_scf)
+            if skip_final_scf:
+                converged_relax = verify_convergence_trajectory(trajectory, -1, *values)
+                return converged_relax
+
             converged_relax = verify_convergence_trajectory(trajectory, -2, *values)
             converged_final = verify_convergence_trajectory(trajectory, -1, *values)
 
